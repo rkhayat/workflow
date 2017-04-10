@@ -2,6 +2,7 @@ import json
 
 import yaml
 
+from .utils import json
 from .apps.atom import Atom
 from .apps.chrome import GoogleChrome
 from .apps.idea import Idea
@@ -30,9 +31,8 @@ class Container:
         self.percent = percent
         self.nodes = nodes
 
-    def toJSON(self):
-        return json.dumps(self, default=lambda o: o.__dict__,
-                          sort_keys=True, indent=4)
+    def to_json(self):
+        return json.dumps(self, sort_keys=True, indent=4)
 
 
 class App:
@@ -43,9 +43,8 @@ class App:
         self.percent = percent
         self.swallows = [{"class": "^" + name + "$"}]
 
-    def toJSON(self):
-        return json.dumps(self, default=lambda o: o.__dict__,
-                          sort_keys=True, indent=4)
+    def to_json(self):
+        return json.dumps(self, sort_keys=True, indent=4)
 
 
 def parse_layout(node):

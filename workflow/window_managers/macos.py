@@ -1,50 +1,43 @@
-import invoke
-from AppKit import NSScreen
-from ScriptingBridge import SBApplication
+from workflow.utils import json
+from .base import AbstractWm
 
 
 def screen_size_tuple(width_factor=1, height_factor=1):
+    from AppKit import NSScreen
     size = NSScreen.mainScreen().frame().size
     return size.width * width_factor, size.height * height_factor
 
 
-def set_size_of_app(app, size, position):
+def set_size_of_app(app, size, position, index=0):
+    from ScriptingBridge import SBApplication
     app = SBApplication.applicationWithBundleIdentifier_(app)
-    finderWin = app.windows()[0]
+    finderWin = app.windows()[index]
     finderWin.setBounds_([size, size])
     finderWin.setPosition_(position)
 
 
-class Wm:
-    def __init__(self, debug=False):
-        self.debug = debug
+def setup_window(config, index=0):
+    size = screen_size_tuple(width_factor=0.5)
+    x_position = 0 if index == 0 else size[0]
+    y_position = 0
+    set_size_of_app(
+        'com.apple.Finder',
+        size,
+        position=[x_position, y_position],
+        index=index
+    )
 
-    def create_workflow(self):
-        raise NotImplementedError
 
-    def create_workspace(self, workspace):
-        if workspace.layout.layout == 'splith':
-            set_size_of_app(
-                'com.apple.Finder',
-                screen_size_tuple(width_factor=0.5),
-                position=[0, 0]
-            )
-        print(workspace.__dict__)
-        print(workspace.layout.__dict__)
-        raise NotImplementedError()
+class Wm(AbstractWm):
+    def setup_workflow(self, workflow):
+        print(json.dumps(workflow))
+        for index, window in enumerate(workflow):
+            setup_window(window, index)
 
-    def create_layout(self, layout):
-        print(layout)
-        raise NotImplementedError
-
-    def command(self, cmd):
-        if self.debug:
-            print(cmd)
-        else:
-            invoke.run(cmd)
-
-    def open(self, cmd):
-        self.command("exec " + cmd)
-
-    def get_current_workspace(self):
-        raise NotImplementedError()
+    @property
+    def is_supported_in_current_environment(self):
+        try:
+            from AppKit import NSScreen
+            return True
+        except ImportError:
+            return False

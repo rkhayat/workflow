@@ -43,7 +43,7 @@ class Wm(AbstractWm):
 
     def create_layout(self, layout):
         f = tempfile.NamedTemporaryFile(mode="w", delete=True)
-        f.write(layout.toJSON() + "\n")
+        f.write(layout.to_json() + "\n")
         f.flush()
         tmp_name = f.name
 
